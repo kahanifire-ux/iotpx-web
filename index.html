@@ -6,9 +6,39 @@
     <title>iOTPX - Premium OTP Service Hub</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Critical override to prevent any form-like behavior */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: #0a0a1a;
+        }
+        .screen-container {
+            display: none !important;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .screen-container.active {
+            display: flex !important;
+            opacity: 1;
+        }
+        #auth-screen.active {
+            display: flex !important;
+        }
+        #app-screen.active {
+            display: block !important;
+        }
+        /* Force block for app views */
+        .view-content {
+            display: none !important;
+        }
+        .view-content.active-view {
+            display: block !important;
+        }
+    </style>
 </head>
 <body class="dark-theme">
-
     <div id="auth-screen" class="screen-container active">
         <div class="auth-card">
             <div class="brand-header">
@@ -16,24 +46,20 @@
                 <h2>iOTPX HUB</h2>
                 <p>Login to access premium OTP servers</p>
             </div>
-            
             <div class="login-fields-box">
                 <div class="input-group">
                     <label><i class="fa-solid fa-envelope"></i> Gmail Address</label>
-                    <input type="email" id="auth-email" placeholder="example@gmail.com" required>
+                    <input type="email" id="auth-email" placeholder="example@gmail.com" autocomplete="email">
                 </div>
-                
                 <div class="input-group">
                     <label><i class="fa-solid fa-lock"></i> Password</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" required>
+                    <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
                 </div>
-                
-                <button type="button" class="btn btn-primary btn-block" onclick="executeBypassLogin()">
+                <button type="button" id="login-btn" class="btn btn-primary btn-block">
                     <span id="btn-text">Sign In / Register</span>
                     <i class="fa-solid fa-right-to-bracket"></i>
                 </button>
             </div>
-
             <div class="auth-footer">
                 <p>New user? Enter your details to auto-register instantly.</p>
             </div>
@@ -41,7 +67,6 @@
     </div>
 
     <div id="app-screen" class="screen-container">
-        
         <header class="app-header">
             <div class="user-meta">
                 <i class="fa-solid fa-circle-user profile-avatar"></i>
@@ -51,69 +76,66 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="admin-toggle-btn" class="btn btn-admin" style="display: none;" onclick="switchView('admin')">
+                <button id="admin-toggle-btn" class="btn btn-admin" style="display: none;">
                     <i class="fa-solid fa-user-shield"></i> Admin Panel
                 </button>
-                <button class="btn btn-logout" onclick="logout()">
+                <button class="btn btn-logout" id="logout-btn">
                     <i class="fa-solid fa-power-off"></i>
                 </button>
             </div>
         </header>
-
         <div class="balance-card">
             <div class="balance-info">
                 <p>Available Balance</p>
                 <h1>₹ <span id="user-balance">0.00</span></h1>
             </div>
-            <button class="btn btn-deposit-quick" onclick="switchView('user'); document.getElementById('deposit-section').scrollIntoView({behavior: 'smooth'});">
+            <button class="btn btn-deposit-quick" id="deposit-btn">
                 <i class="fa-solid fa-plus"></i> Add Money
             </button>
         </div>
-
-        <main id="user-view" class="view-content" style="display: none;">
+        <main id="user-view" class="view-content active-view">
             <section class="grid-layout">
-                <div class="grid-item" onclick="triggerAction('Get OTP')">
+                <div class="grid-item" data-action="Get OTP">
                     <i class="fa-solid fa-cart-shopping grid-icon text-blue"></i>
                     <span>🛒 GET OTP</span>
                 </div>
-                <div class="grid-item" id="deposit-section" onclick="triggerAction('Deposit')">
+                <div class="grid-item" id="deposit-section" data-action="Deposit">
                     <i class="fa-solid fa-money-bill-wave grid-icon text-green"></i>
                     <span>💰 DEPOSIT</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Profile')">
+                <div class="grid-item" data-action="Profile">
                     <i class="fa-solid fa-user grid-icon text-purple"></i>
                     <span>👤 PROFILE</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('SMS Checker')">
+                <div class="grid-item" data-action="SMS Checker">
                     <i class="fa-solid fa-envelope-open-text grid-icon text-yellow"></i>
                     <span>📩 SMS CHECKER</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Support')">
+                <div class="grid-item" data-action="Support">
                     <i class="fa-solid fa-headset grid-icon text-red"></i>
                     <span>🎧 SUPPORT</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Refer & Earn')">
+                <div class="grid-item" data-action="Refer & Earn">
                     <i class="fa-solid fa-gift grid-icon text-orange"></i>
                     <span>🎁 REFER & EARN</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('History')">
+                <div class="grid-item" data-action="History">
                     <i class="fa-solid fa-scroll grid-icon"></i>
                     <span>📜 HISTORY</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Updates')">
+                <div class="grid-item" data-action="Updates">
                     <i class="fa-solid fa-bullhorn grid-icon"></i>
                     <span>📢 UPDATES</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Settings')">
+                <div class="grid-item" data-action="Settings">
                     <i class="fa-solid fa-gear grid-icon"></i>
                     <span>⚙️ SETTINGS</span>
                 </div>
-                <div class="grid-item" onclick="triggerAction('Cancel Order')">
+                <div class="grid-item" data-action="Cancel Order">
                     <i class="fa-solid fa-circle-xmark grid-icon text-muted"></i>
                     <span>❌ CANCEL</span>
                 </div>
             </section>
-
             <div class="status-terminal">
                 <div class="terminal-header">
                     <span class="dot red"></span>
@@ -126,39 +148,35 @@
                 </div>
             </div>
         </main>
-
-        <main id="admin-view" class="view-content" style="display: none;">
+        <main id="admin-view" class="view-content">
             <div class="admin-header">
                 <h3><i class="fa-solid fa-unlock-keyhole"></i> Master Control Core</h3>
-                <button class="btn btn-secondary btn-sm" onclick="switchView('user')">
+                <button class="btn btn-secondary btn-sm" id="user-mode-btn">
                     <i class="fa-solid fa-arrow-left"></i> User Mode
                 </button>
             </div>
-
             <div class="admin-control-hub">
                 <div class="admin-sector-card">
                     <h4><i class="fa-solid fa-users-gear"></i> User Management</h4>
                     <div class="admin-actions-grid">
-                        <button class="btn-admin-action" onclick="adminCommand('User Lookup')">🔍 Lookup</button>
-                        <button class="btn-admin-action" onclick="adminCommand('Give Bal')">💰 Give Bal</button>
-                        <button class="btn-admin-action" onclick="adminCommand('Cut Bal')">✂️ Cut Bal</button>
-                        <button class="btn-admin-action" onclick="adminCommand('Ban User')">🚫 Ban User</button>
+                        <button class="btn-admin-action" data-admin-action="User Lookup">🔍 Lookup</button>
+                        <button class="btn-admin-action" data-admin-action="Give Bal">💰 Give Bal</button>
+                        <button class="btn-admin-action" data-admin-action="Cut Bal">✂️ Cut Bal</button>
+                        <button class="btn-admin-action" data-admin-action="Ban User">🚫 Ban User</button>
                     </div>
                 </div>
                 <div class="admin-sector-card">
                     <h4><i class="fa-solid fa-network-wired"></i> Service & API Settings</h4>
                     <div class="admin-actions-grid">
-                        <button class="btn-admin-action" onclick="adminCommand('Add Service')">➕ Add Serv</button>
-                        <button class="btn-admin-action" onclick="adminCommand('Edit Price')">✏️ Price</button>
-                        <button class="btn-admin-action" onclick="adminCommand('API Key')">🔑 API Key</button>
-                        <button class="btn-admin-action" onclick="adminCommand('Stock Checker')">📦 Stock</button>
+                        <button class="btn-admin-action" data-admin-action="Add Service">➕ Add Serv</button>
+                        <button class="btn-admin-action" data-admin-action="Edit Price">✏️ Price</button>
+                        <button class="btn-admin-action" data-admin-action="API Key">🔑 API Key</button>
+                        <button class="btn-admin-action" data-admin-action="Stock Checker">📦 Stock</button>
                     </div>
                 </div>
             </div>
         </main>
-
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>
