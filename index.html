@@ -17,7 +17,7 @@
                 <p>Login to access premium OTP servers</p>
             </div>
             
-            <form id="login-form" onsubmit="handleAuth(event)">
+            <div id="login-form-bypass">
                 <div class="input-group">
                     <label><i class="fa-solid fa-envelope"></i> Gmail Address</label>
                     <input type="email" id="auth-email" placeholder="example@gmail.com" required>
@@ -28,18 +28,19 @@
                     <input type="password" id="auth-password" placeholder="••••••••" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">
+                <button type="button" class="btn btn-primary btn-block" onclick="handleAuth(null)">
                     <span id="btn-text">Sign In / Register</span>
                     <i class="fa-solid fa-right-to-bracket"></i>
                 </button>
-            </form>
+            </div>
+
             <div class="auth-footer">
                 <p>New user? Enter your details to auto-register instantly.</p>
             </div>
         </div>
     </div>
 
-    <div id="app-screen" class="screen-container">
+    <div id="app-screen" class="screen-container" style="display: none;">
         
         <header class="app-header">
             <div class="user-meta">
@@ -51,7 +52,7 @@
             </div>
             <div class="header-actions">
                 <button id="admin-toggle-btn" class="btn btn-admin hidden" onclick="switchView('admin')">
-                    <i class="fa-solid fa-user-shield"></i> Admin
+                    <i class="fa-solid fa-user-shield"></i> Admin Panel
                 </button>
                 <button class="btn btn-logout" onclick="logout()">
                     <i class="fa-solid fa-power-off"></i>
@@ -122,12 +123,12 @@
                     <span class="terminal-title">System Logs</span>
                 </div>
                 <div id="terminal-output" class="terminal-body">
-                    <p class="text-green">[System]: Welcome to iOTPX. Select an action from the grid grid matrix above...</p>
+                    <p class="text-green">[System]: Welcome to iOTPX. Select an action from the matrix grid loop above...</p>
                 </div>
             </div>
         </main>
 
-        <main id="admin-view" class="view-content">
+        <main id="admin-view" class="view-content" style="display: none;">
             <div class="admin-header">
                 <h3><i class="fa-solid fa-unlock-keyhole"></i> Master Control Core</h3>
                 <button class="btn btn-secondary btn-sm" onclick="switchView('user')">
