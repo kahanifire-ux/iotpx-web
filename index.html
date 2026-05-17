@@ -17,7 +17,7 @@
                 <p>Login to access premium OTP servers</p>
             </div>
             
-            <div id="login-form-bypass">
+            <div class="login-fields-box">
                 <div class="input-group">
                     <label><i class="fa-solid fa-envelope"></i> Gmail Address</label>
                     <input type="email" id="auth-email" placeholder="example@gmail.com" required>
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div id="app-screen" class="screen-container hidden-panel" style="display: none;">
+    <div id="app-screen" class="screen-container" style="display: none;">
         
         <header class="app-header">
             <div class="user-meta">
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="admin-toggle-btn" class="btn btn-admin hidden" onclick="switchView('admin')">
+                <button id="admin-toggle-btn" class="btn btn-admin" style="display: none;" onclick="switchView('admin')">
                     <i class="fa-solid fa-user-shield"></i> Admin Panel
                 </button>
                 <button class="btn btn-logout" onclick="logout()">
@@ -70,7 +70,7 @@
             </button>
         </div>
 
-        <main id="user-view" class="view-content active">
+        <main id="user-view" class="view-content" style="display: block;">
             <section class="grid-layout">
                 <div class="grid-item" onclick="triggerAction('Get OTP')">
                     <i class="fa-solid fa-cart-shopping grid-icon text-blue"></i>
@@ -122,7 +122,7 @@
                     <span class="terminal-title">System Logs</span>
                 </div>
                 <div id="terminal-output" class="terminal-body">
-                    <p class="text-green">[System]: Welcome to iOTPX. Select an action from the matrix grid loop above...</p>
+                    <p class="text-green">[System]: Welcome to iOTPX. Select an action from the matrix grid loop...</p>
                 </div>
             </div>
         </main>
