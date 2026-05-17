@@ -1,0 +1,116 @@
+// ==========================================
+// iOTPX CORE CLIENT ENGINE - APP.JS
+// ==========================================
+
+// Global Mock Application State
+const state = {
+    currentUser: null,
+    isAdmin: false,
+    balance: 0.00,
+    adminId: "7000269541" // Master Admin Configuration
+};
+
+// 1. AUTHENTICATION CONTROLLER (GMAIL & PASSWORD)
+function handleAuth(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const btnText = document.getElementById('btn-text');
+    
+    if (!email || !password) return;
+    
+    btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+    
+    // Simulate high-speed authentication verification network delay
+    setTimeout(() => {
+        state.currentUser = email;
+        document.getElementById('user-display-email').innerText = email;
+        
+        // Dynamic Logic Check: If Gmail matches master admin handle or secret password
+        if (email.toLowerCase() === 'admin@iotpx.com' || password === state.adminId) {
+            state.isAdmin = true;
+            state.balance = 99999.99;
+            document.getElementById('admin-toggle-btn').classList.remove('hidden');
+            logTerminal(`[System]: Master Admin Session Initiated. Secure channels open.`, 'text-yellow');
+        } else {
+            state.isAdmin = false;
+            state.balance = 0.00;
+            document.getElementById('admin-toggle-btn').classList.add('hidden');
+            logTerminal(`[System]: Secure registration successful for user session: ${email}`, 'text-green');
+        }
+        
+        // Update balance views layer
+        document.getElementById('user-balance').innerText = state.balance.toFixed(2);
+        
+        // Transition Screens Layout mapping
+        document.getElementById('auth-screen').classList.remove('active');
+        document.getElementById('app-screen').classList.add('active');
+        
+        btnText.innerText = 'Sign In / Register';
+    }, 1200);
+}
+
+// 2. RUNTIME VIEW NAVIGATION ROUTER
+function switchView(targetView) {
+    const userView = document.getElementById('user-view');
+    const adminView = document.getElementById('admin-view');
+    
+    if (targetView === 'admin' && state.isAdmin) {
+        userView.classList.remove('active');
+        adminView.classList.add('active');
+        logTerminal("[Admin]: Root access mapped to control panel sectors.", 'text-yellow');
+    } else {
+        adminView.classList.remove('active');
+        userView.classList.add('active');
+        logTerminal("[System]: Switched to live client interface framework.");
+    }
+}
+
+// 3. USER INTERFACE INTERACTION HANDLER
+function triggerAction(actionName) {
+    logTerminal(`[Action]: Triggered structural node [${actionName}]. Processing queue request...`);
+    
+    if (actionName === 'Get OTP') {
+        logTerminal(`[API Request]: Requesting available active country lines...`, 'text-yellow');
+    } else if (actionName === 'Deposit') {
+        logTerminal(`[Payment]: Gateway payload generated. Minimum criteria set at ₹10.00.`);
+    }
+}
+
+// 4. ADMIN SECTOR SUB-PANEL CONTROLLER
+function adminCommand(commandName) {
+    logTerminal(`[Admin Core]: Broadcaster executing alteration request: [${commandName}]`, 'text-yellow');
+}
+
+// 5. TERMINAL STREAM LOGGER SYSTEM
+function logTerminal(message, colorClass = '') {
+    const terminal = document.getElementById('terminal-output');
+    if (!terminal) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const paragraph = document.createElement('p');
+    
+    if (colorClass) {
+        paragraph.className = colorClass;
+    }
+    
+    paragraph.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+    terminal.appendChild(paragraph);
+    
+    // Auto-scroll anchor adjustments inside mobile web container
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+// 6. SESSION LOGOUT EXIT ROUTINE
+function logout() {
+    state.currentUser = null;
+    state.isAdmin = false;
+    
+    document.getElementById('app-screen').classList.remove('active');
+    document.getElementById('auth-screen').classList.add('active');
+    document.getElementById('login-form').reset();
+    
+    // Reset core states components
+    logTerminal("[System]: Session destroyed. Client terminal cleared.");
+}

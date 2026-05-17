@@ -1,0 +1,426 @@
+/* ========================================== */
+/* CORE SETUP & MODERN DARK ANIME THEME       */
+/* ========================================== */
+:root {
+    --bg-main: #0b0f19;
+    --bg-card: #161f32;
+    --bg-input: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-glow: rgba(59, 130, 246, 0.5);
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --yellow: #f59e0b;
+    --orange: #f97316;
+    --admin-color: #ec4899;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-x: hidden;
+}
+
+/* Screen Containers Configuration */
+.screen-container {
+    display: none;
+    width: 100%;
+    max-width: 480px; /* Perfect Mobile Framework width */
+    padding: 20px;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.screen-container.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================== */
+/* 1. AUTHENTICATION SHIELD (LOGIN SCREEN)    */
+/* ========================================== */
+#auth-screen {
+    padding-top: 15vh;
+}
+
+.auth-card {
+    background: linear-gradient(145deg, var(--bg-card), #111827);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 30px 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.brand-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.brand-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary-glow);
+    margin-bottom: 10px;
+}
+
+.brand-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.brand-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.input-group label i {
+    margin-right: 4px;
+}
+
+.input-group input {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ========================================== */
+/* BUTTON ARCHITECTURE                        */
+/* ========================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-block {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+.btn-logout {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--red);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+}
+
+.btn-admin {
+    background: rgba(236, 72, 153, 0.15);
+    color: var(--admin-color);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(236, 72, 153, 0.3);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========================================== */
+/* APP DESK AND NAV BAR                       */
+/* ========================================== */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-avatar {
+    font-size: 2.2rem;
+    color: var(--text-muted);
+}
+
+.user-email {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    max-width: 160px;
+    white-width: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-rank {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--green);
+    font-weight: 500;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Balance Card Section */
+.balance-card {
+    background: linear-gradient(135deg, #1e293b, var(--bg-card));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.balance-info p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.balance-info h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.btn-deposit-quick {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--green);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+/* ========================================== */
+/* PREMIUM GRID LAYOUT MATRIX (THE CORE BOT LOOK) */
+/* ========================================== */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.grid-item {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 20px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.grid-item:active {
+    transform: scale(0.95);
+    background-color: var(--bg-input);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.grid-icon {
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.grid-item span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Brand Grid Color Coding accents */
+.text-blue { color: var(--primary); }
+.text-green { color: var(--green); }
+.text-purple { color: var(--purple); }
+.text-yellow { color: var(--yellow); }
+.text-red { color: var(--red); }
+.text-orange { color: var(--orange); }
+.text-muted { color: var(--text-muted); }
+
+/* ========================================== */
+/* LIVE STATUS TERMINAL SYSTEM LOGS          */
+/* ========================================== */
+.status-terminal {
+    background-color: #05070c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.terminal-header {
+    background-color: #0e131f;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.dot.red { background-color: var(--red); }
+.dot.yellow { background-color: var(--yellow); }
+.dot.green { background-color: var(--green); }
+
+.terminal-title {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+.terminal-body {
+    padding: 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    min-height: 100px;
+    max-height: 160px;
+    overflow-y: auto;
+    line-height: 1.4;
+}
+
+.text-green { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+
+/* ========================================== */
+/* SECRET ADMIN CORE VIEW INTERFACE           */
+/* ========================================== */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed rgba(236, 72, 153, 0.2);
+    padding-bottom: 12px;
+}
+
+.admin-header h3 {
+    color: var(--admin-color);
+    font-size: 1.1rem;
+}
+
+.admin-control-hub {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-sector-card {
+    background-color: #0e1422;
+    border: 1px solid rgba(236, 72, 153, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.admin-sector-card h4 {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-sector-card h4 i {
+    color: var(--admin-color);
+}
+
+.admin-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.btn-admin-action {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-admin-action:active {
+    background-color: var(--admin-color);
+    color: white;
+    transform: scale(0.96);
+}
