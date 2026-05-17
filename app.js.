@@ -1,4 +1,3 @@
-// Global App Configuration Data State Component
 const state = {
     currentUser: null,
     isAdmin: false,
@@ -6,97 +5,69 @@ const state = {
     adminId: "7000269541"
 };
 
-// DIRECT EXPLICIT ENTRY POINT (BYPASSES CORE INLINE REDIRECTS)
 function executeBypassLogin() {
-    const emailField = document.getElementById('auth-email');
-    const passwordField = document.getElementById('auth-password');
-    
-    if (!emailField || !passwordField) {
-        alert("System component matching error.");
+    const emailValue = document.getElementById('auth-email').value.trim();
+    const passwordValue = document.getElementById('auth-password').value;
+
+    if (emailValue === "" || passwordValue === "") {
+        alert("Please fill in all fields.");
         return;
     }
 
-    const email = emailField.value.trim();
-    const password = passwordField.value;
+    state.currentUser = emailValue;
+    document.getElementById('user-display-email').innerText = emailValue;
 
-    if (email === "" || password === "") {
-        alert("Please enter both Gmail and Password to initialize session.");
-        return;
-    }
-
-    // Set User Credentials Layer Models
-    state.currentUser = email;
-    document.getElementById('user-display-email').innerText = email;
-
-    // Evaluate Security Nodes for Admin State Injection
-    if (email.toLowerCase().includes('admin') || password === state.adminId) {
+    // Admin login logic checker
+    if (emailValue.toLowerCase().includes('admin') || passwordValue === state.adminId) {
         state.isAdmin = true;
-        state.balance = 99999.50;
-        document.getElementById('admin-toggle-btn').classList.remove('hidden');
-        document.getElementById('admin-toggle-btn').style.display = "inline-block";
+        state.balance = 99999.00;
+        document.getElementById('admin-toggle-btn').style.display = 'inline-block';
     } else {
         state.isAdmin = false;
-        state.balance = 75.00; // Testing balance allowance
-        document.getElementById('admin-toggle-btn').classList.add('hidden');
-        document.getElementById('admin-toggle-btn').style.display = "none";
+        state.balance = 50.00;
+        document.getElementById('admin-toggle-btn').style.display = 'none';
     }
 
     document.getElementById('user-balance').innerText = state.balance.toFixed(2);
 
-    // Hard Core Force View State Changes - Class and Style Overrides
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-
-    authScreen.classList.remove('active');
-    authScreen.style.display = 'none';
-
-    appScreen.classList.add('active');
-    appScreen.style.display = 'block';
-    
-    logTerminal(`[System]: Secure node registration successful for session: ${email}`, 'text-green');
+    // Direct Style Manipulation - Isko css block nahi kar payega
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
 }
 
-function switchView(targetView) {
-    const userView = document.getElementById('user-view');
-    const adminView = document.getElementById('admin-view');
-    
-    if (targetView === 'admin') {
-        userView.style.display = 'none';
-        adminView.style.display = 'block';
-        logTerminal("[Admin Control]: Active root deck mounted.", 'text-yellow');
+function switchView(viewName) {
+    if (viewName === 'admin') {
+        document.getElementById('user-view').style.display = 'none';
+        document.getElementById('admin-view').style.display = 'block';
     } else {
-        adminView.style.display = 'none';
-        userView.style.display = 'block';
-        logTerminal("[System]: Switched to customer deployment array.");
+        document.getElementById('admin-view').style.display = 'none';
+        document.getElementById('user-view').style.display = 'block';
     }
 }
 
 function triggerAction(actionName) {
-    logTerminal(`[Action]: Dispatched standard operation sequence [${actionName}]`);
+    logTerminal(`[Action]: Triggered operation -> ${actionName}`);
 }
 
-function adminCommand(commandName) {
-    logTerminal(`[Admin Engine]: Executing terminal modification -> [${commandName}]`, 'text-yellow');
+function adminCommand(cmd) {
+    logTerminal(`[Admin]: Executing command -> ${cmd}`, 'text-yellow');
 }
 
-function logTerminal(message, colorClass = '') {
+ tyranny line logTerminal(message, colorClass = '') {
     const terminal = document.getElementById('terminal-output');
     if (!terminal) return;
-    const timestamp = new Date().toLocaleTimeString();
+    const time = new Date().toLocaleTimeString();
     const p = document.createElement('p');
     if (colorClass) p.className = colorClass;
-    p.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+    p.innerHTML = `<span>[${time}]</span> ${message}`;
     terminal.appendChild(p);
     terminal.scrollTop = terminal.scrollHeight;
 }
 
 function logout() {
-    state.currentUser = null;
-    state.isAdmin = false;
     document.getElementById('app-screen').style.display = 'none';
-    const auth = document.getElementById('auth-screen');
-    auth.style.display = 'block';
-    auth.classList.add('active');
+    document.getElementById('auth-screen').style.display = 'block';
     document.getElementById('auth-email').value = '';
     document.getElementById('auth-password').value = '';
 }
+
