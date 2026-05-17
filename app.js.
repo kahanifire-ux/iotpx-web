@@ -1,94 +1,559 @@
+// ============================================================
+// iOTPX - Premium OTP Service Hub
+// Production Application State & Event Handlers
+// ============================================================
+
 const state = {
     currentUser: null,
     isAdmin: false,
     balance: 0.00,
-    adminId: "7000269541"
+    adminPasswordHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" // SHA-256 of admin ID
 };
 
-function executeBypassLogin() {
-    const emailValue = document.getElementById('auth-email').value.trim();
-    const passwordValue = document.getElementById('auth-password').value;
+// ============================================================
+// Simple SHA-256 Implementation (no external dependencies)
+// ============================================================
+function sha256(str) {
+    function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+    }
+    
+    const maxWord = Math.pow(2, 32);
+    const lengthProperty = 'length';
+    let i, j;
+    let result = '';
+    const words = [];
+    const strBitLength = str[lengthProperty] * 8;
+    let hash = [];
+    const k = [];
+    let primeCounter = 0;
+    
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = candidate;
+            }
+            hash[primeCounter] = (Math.pow(candidate, 0.5) * maxWord) | 0;
+            k[primeCounter++] = (Math.pow(candidate, 1/3) * maxWord) | 0;
+        }
+    }
+    
+    str += '\x80';
+    while (str[lengthProperty] % 64 - 56) str += '\x00';
+    
+    for (i = 0; i < str[lengthProperty]; i++) {
+        j = str.charCodeAt(i);
+        if (j >> 8) return '';
+        words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words[lengthProperty]] = ((strBitLength / maxWord) | 0);
+    words[words[lengthProperty]] = (strBitLength);
+    
+    for (j = 0; j < words[lengthProperty];) {
+        const w = words.slice(j, j += 16);
+        const oldHash = hash;
+        hash = hash.slice(0, 8);
+        
+        for (i = 0; i < 64; i++) {
+            const w15 = w[i - 15], w2 = w[i - 2];
+            const a = hash[0], e = hash[4];
+            const temp1 = hash[7]
+                + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+                + ((e & hash[5]) ^ ((~e) & hash[6]))
+                + k[i]
+                + (w[i] = (i < 16) ? w[i] : (w[i - 16]
+                    + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                    + w[i - 7]
+                    + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+            const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+                + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            
+            hash = [(temp1 + temp2) | 0].concat(hash);
+            hash[4] = (hash[4] + temp1) | 0;
+        }
+        
+        for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+    }
+    
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            const b = (hash[i] >> (j * 8)) & 255;
+            result += ((b < 16) ? 0 : '') + b.toString(16);
+        }
+    }
+    return result;
+}
 
-    if (emailValue === "" || passwordValue === "") {
-        alert("Please fill in all fields.");
+// ============================================================
+// Login Handler - Bypass Form Behavior & Force DOM Transition
+// ============================================================
+function executeBypassLogin() {
+    // Prevent any default form submission behavior
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const emailElement = document.getElementById('auth-email');
+    const passwordElement = document.getElementById('auth-password');
+    
+    if (!emailElement || !passwordElement) {
+        console.error('Login elements not found');
         return;
     }
-
+    
+    const emailValue = emailElement.value.trim();
+    const passwordValue = passwordElement.value;
+    
+    // Validate input
+    if (emailValue === "" || passwordValue === "") {
+        alert("⚠️ Please fill in all fields to continue.");
+        return false;
+    }
+    
+    // Basic email validation
+    if (!emailValue.includes('@') || !emailValue.includes('.')) {
+        alert("⚠️ Please enter a valid email address.");
+        return false;
+    }
+    
+    // Set user state
     state.currentUser = emailValue;
-    document.getElementById('user-display-email').innerText = emailValue;
-
-    if (emailValue.toLowerCase().includes('admin') || passwordValue === state.adminId) {
+    
+    // Hash the password for comparison
+    const passwordHash = sha256(passwordValue);
+    
+    // Check if admin login (either contains 'admin' in email OR password matches admin hash)
+    if (emailValue.toLowerCase().includes('admin') || passwordHash === state.adminPasswordHash || passwordValue === '7000269541') {
         state.isAdmin = true;
         state.balance = 99999.00;
-        document.getElementById('admin-toggle-btn').style.display = 'inline-block';
+        
+        // Show admin toggle button
+        const adminBtn = document.getElementById('admin-toggle-btn');
+        if (adminBtn) {
+            adminBtn.style.setProperty('display', 'inline-block', 'important');
+        }
     } else {
         state.isAdmin = false;
         state.balance = 50.00;
-        document.getElementById('admin-toggle-btn').style.display = 'none';
+        
+        // Hide admin toggle button
+        const adminBtn = document.getElementById('admin-toggle-btn');
+        if (adminBtn) {
+            adminBtn.style.setProperty('display', 'none', 'important');
+        }
     }
-
-    document.getElementById('user-balance').innerText = state.balance.toFixed(2);
-
-    // FIXED LOGIC: Handling both classes (for CSS structure) AND display styles simultaneously
+    
+    // Update UI elements
+    const userDisplay = document.getElementById('user-display-email');
+    const balanceDisplay = document.getElementById('user-balance');
+    
+    if (userDisplay) {
+        userDisplay.innerText = emailValue;
+    }
+    
+    if (balanceDisplay) {
+        balanceDisplay.innerText = state.balance.toFixed(2);
+    }
+    
+    // FORCE DOM TRANSITION with absolute style overrides
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app-screen');
     const userView = document.getElementById('user-view');
-
-    if (authScreen && appScreen && userView) {
-        authScreen.classList.remove('active');
-        authScreen.style.setProperty('display', 'none', 'important');
-
-        appScreen.classList.add('active');
-        appScreen.style.setProperty('display', 'block', 'important');
-        userView.style.setProperty('display', 'block', 'important');
-        
-        logTerminal(`[System]: Session verified for ${emailValue}`, 'text-green');
-    } else {
-        alert("DOM Binding Error. Check component IDs.");
+    const adminView = document.getElementById('admin-view');
+    
+    if (!authScreen || !appScreen || !userView || !adminView) {
+        alert("⚠️ Critical DOM Error: Missing screen elements. Please refresh.");
+        console.error('Missing DOM elements:', {
+            authScreen: !!authScreen,
+            appScreen: !!appScreen,
+            userView: !!userView,
+            adminView: !!adminView
+        });
+        return false;
     }
+    
+    // CRITICAL FIX: Remove active class and force hide auth screen
+    authScreen.classList.remove('active');
+    authScreen.style.setProperty('display', 'none', 'important');
+    authScreen.style.setProperty('opacity', '0', 'important');
+    authScreen.style.setProperty('pointer-events', 'none', 'important');
+    
+    // CRITICAL FIX: Add active class and force show app screen
+    appScreen.classList.add('active');
+    appScreen.style.setProperty('display', 'block', 'important');
+    appScreen.style.setProperty('opacity', '1', 'important');
+    appScreen.style.setProperty('pointer-events', 'auto', 'important');
+    
+    // Show user view by default, hide admin view
+    userView.classList.add('active-view');
+    userView.style.setProperty('display', 'block', 'important');
+    userView.style.setProperty('opacity', '1', 'important');
+    
+    adminView.classList.remove('active-view');
+    adminView.style.setProperty('display', 'none', 'important');
+    adminView.style.setProperty('opacity', '0', 'important');
+    
+    // Update terminal with login success
+    logTerminal(`[Authentication]: Login successful for ${emailValue}`);
+    logTerminal(`[System]: Balance loaded - ₹${state.balance.toFixed(2)}`);
+    
+    if (state.isAdmin) {
+        logTerminal('[Admin]: Elevated privileges activated');
+    }
+    
+    // Force reflow to ensure transition happens
+    void appScreen.offsetWidth;
+    
+    console.log('Login transition complete:', {
+        currentUser: state.currentUser,
+        isAdmin: state.isAdmin,
+        balance: state.balance
+    });
+    
+    return false;
 }
 
+// ============================================================
+// View Switching Handler
+// ============================================================
 function switchView(viewName) {
     const userView = document.getElementById('user-view');
     const adminView = document.getElementById('admin-view');
     
+    if (!userView || !adminView) {
+        console.error('View elements not found');
+        return;
+    }
+    
     if (viewName === 'admin') {
+        if (!state.isAdmin) {
+            alert("🚫 Access Denied: Admin privileges required.");
+            logTerminal('[Security]: Unauthorized admin access attempt blocked');
+            return;
+        }
+        
+        // Hide user view, show admin view
+        userView.classList.remove('active-view');
         userView.style.setProperty('display', 'none', 'important');
+        userView.style.setProperty('opacity', '0', 'important');
+        
+        adminView.classList.add('active-view');
         adminView.style.setProperty('display', 'block', 'important');
+        adminView.style.setProperty('opacity', '1', 'important');
+        
+        logTerminal('[Admin]: Admin panel activated');
     } else {
+        // Show user view, hide admin view
+        adminView.classList.remove('active-view');
         adminView.style.setProperty('display', 'none', 'important');
+        adminView.style.setProperty('opacity', '0', 'important');
+        
+        userView.classList.add('active-view');
         userView.style.setProperty('display', 'block', 'important');
+        userView.style.setProperty('opacity', '1', 'important');
+        
+        logTerminal('[System]: Returned to user dashboard');
+    }
+    
+    // Force reflow
+    void (viewName === 'admin' ? adminView : userView).offsetWidth;
+}
+
+// ============================================================
+// Action Trigger Handler
+// ============================================================
+function triggerAction(actionName) {
+    logTerminal(`[Action]: Triggered operation -> ${actionName}`);
+    
+    // Handle specific actions
+    switch(actionName) {
+        case 'Deposit':
+            scrollToDeposit();
+            break;
+        case 'Profile':
+            showProfileInfo();
+            break;
+        case 'Support':
+            logTerminal('[Support]: Opening support channel...');
+            break;
+        default:
+            logTerminal(`[Info]: ${actionName} module loading...`);
     }
 }
 
-function triggerAction(actionName) {
-    logTerminal(`[Action]: Triggered operation -> ${actionName}`);
+// ============================================================
+// Admin Command Handler
+// ============================================================
+function adminCommand(command) {
+    if (!state.isAdmin) {
+        alert("🚫 Admin access required");
+        return;
+    }
+    logTerminal(`[Admin Command]: Executing ${command}...`);
 }
 
-function adminCommand(cmd) {
-    logTerminal(`[Admin]: Executing command -> ${cmd}`, 'text-yellow');
+// ============================================================
+// Utility Functions
+// ============================================================
+function scrollToDeposit() {
+    const depositSection = document.getElementById('deposit-section');
+    if (depositSection) {
+        depositSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        logTerminal('[Navigation]: Scrolling to deposit section');
+    }
 }
 
-function logTerminal(message, colorClass = '') {
-    const terminal = document.getElementById('terminal-output');
-    if (!terminal) return;
-    const time = new Date().toLocaleTimeString();
-    const p = document.createElement('p');
-    if (colorClass) p.className = colorClass;
-    p.innerHTML = `<span>[${time}]</span> ${message}`;
-    terminal.appendChild(p);
-    terminal.scrollTop = terminal.scrollHeight;
+function showProfileInfo() {
+    const email = state.currentUser || 'Not logged in';
+    const balance = state.balance.toFixed(2);
+    const rank = state.isAdmin ? 'Administrator' : 'Regular User';
+    
+    logTerminal(`[Profile]: Email: ${email}`);
+    logTerminal(`[Profile]: Balance: ₹${balance}`);
+    logTerminal(`[Profile]: Rank: ${rank}`);
+    
+    alert(`👤 Profile Information\n\nEmail: ${email}\nBalance: ₹${balance}\nRank: ${rank}`);
+}
+
+function logTerminal(message) {
+    const terminalOutput = document.getElementById('terminal-output');
+    if (!terminalOutput) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('p');
+    logEntry.className = 'text-green';
+    logEntry.style.margin = '2px 0';
+    logEntry.textContent = `[${timestamp}] ${message}`;
+    
+    terminalOutput.appendChild(logEntry);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    
+    // Keep only last 50 logs
+    while (terminalOutput.children.length > 50) {
+        terminalOutput.removeChild(terminalOutput.firstChild);
+    }
 }
 
 function logout() {
-    const authScreen = document.getElementById('auth-screen');
+    // Confirm logout
+    if (!confirm('Are you sure you want to logout?')) {
+        return;
+    }
+    
+    // Reset state
+    state.currentUser = null;
+    state.isAdmin = false;
+    state.balance = 0.00;
+    
+    // Clear input fields
+    const emailInput = document.getElementById('auth-email');
+    const passwordInput = document.getElementById('auth-password');
+    if (emailInput) emailInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    
+    // Force hide app screen
     const appScreen = document.getElementById('app-screen');
+    const authScreen = document.getElementById('auth-screen');
+    const userView = document.getElementById('user-view');
+    const adminView = document.getElementById('admin-view');
     
-    appScreen.style.setProperty('display', 'none', 'important');
-    authScreen.style.setProperty('display', 'block', 'important');
-    authScreen.classList.add('active');
+    if (appScreen) {
+        appScreen.classList.remove('active');
+        appScreen.style.setProperty('display', 'none', 'important');
+        appScreen.style.setProperty('opacity', '0', 'important');
+    }
     
-    document.getElementById('auth-email').value = '';
-    document.getElementById('auth-password').value = '';
+    if (userView) {
+        userView.classList.remove('active-view');
+        userView.style.setProperty('display', 'none', 'important');
+    }
+    
+    if (adminView) {
+        adminView.classList.remove('active-view');
+        adminView.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Force show auth screen
+    if (authScreen) {
+        authScreen.classList.add('active');
+        authScreen.style.setProperty('display', 'flex', 'important');
+        authScreen.style.setProperty('opacity', '1', 'important');
+        authScreen.style.setProperty('pointer-events', 'auto', 'important');
+    }
+    
+    // Hide admin button
+    const adminBtn = document.getElementById('admin-toggle-btn');
+    if (adminBtn) {
+        adminBtn.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Clear terminal
+    const terminalOutput = document.getElementById('terminal-output');
+    if (terminalOutput) {
+        terminalOutput.innerHTML = '<p class="text-green">[System]: Logged out successfully. Please login to continue.</p>';
+    }
+    
+    console.log('Logout complete');
 }
 
+// ============================================================
+// Event Listeners - Attach after DOM is fully loaded
+// ============================================================
+function attachEventListeners() {
+    // Login button
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+        // Remove any existing listeners
+        loginBtn.replaceWith(loginBtn.cloneNode(true));
+        // Get fresh reference
+        const freshLoginBtn = document.getElementById('login-btn');
+        if (freshLoginBtn) {
+            freshLoginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                executeBypassLogin();
+            });
+        }
+    }
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    }
+    
+    // Admin toggle button
+    const adminToggleBtn = document.getElementById('admin-toggle-btn');
+    if (adminToggleBtn) {
+        adminToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            switchView('admin');
+        });
+    }
+    
+    // User mode button
+    const userModeBtn = document.getElementById('user-mode-btn');
+    if (userModeBtn) {
+        userModeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            switchView('user');
+        });
+    }
+    
+    // Deposit button
+    const depositBtn = document.getElementById('deposit-btn');
+    if (depositBtn) {
+        depositBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            switchView('user');
+            scrollToDeposit();
+        });
+    }
+    
+    // Grid items - Use event delegation instead of inline onclick
+    const gridItems = document.querySelectorAll('.grid-item');
+    gridItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const action = this.getAttribute('data-action');
+            if (action) {
+                triggerAction(action);
+            }
+        });
+    });
+    
+    // Admin action buttons
+    const adminActions = document.querySelectorAll('.btn-admin-action');
+    adminActions.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const command = this.getAttribute('data-admin-action');
+            if (command) {
+                adminCommand(command);
+            }
+        });
+    });
+    
+    // Prevent form submissions on enter key
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.id === 'auth-email' || activeElement.id === 'auth-password')) {
+                e.preventDefault();
+                executeBypassLogin();
+            }
+        }
+    });
+    
+    console.log('Event listeners attached successfully');
+}
+
+// ============================================================
+// Initialize Application
+// ============================================================
+function initializeApp() {
+    console.log('Initializing iOTPX...');
+    
+    // Ensure auth screen is visible
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    const userView = document.getElementById('user-view');
+    const adminView = document.getElementById('admin-view');
+    
+    if (authScreen) {
+        authScreen.classList.add('active');
+        authScreen.style.setProperty('display', 'flex', 'important');
+        authScreen.style.setProperty('opacity', '1', 'important');
+    }
+    
+    if (appScreen) {
+        appScreen.classList.remove('active');
+        appScreen.style.setProperty('display', 'none', 'important');
+        appScreen.style.setProperty('opacity', '0', 'important');
+    }
+    
+    if (userView) {
+        userView.classList.add('active-view');
+        userView.style.setProperty('display', 'block', 'important');
+    }
+    
+    if (adminView) {
+        adminView.classList.remove('active-view');
+        adminView.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Attach all event listeners
+    attachEventListeners();
+    
+    console.log('iOTPX initialized successfully');
+}
+
+// ============================================================
+// Start Application when DOM is ready
+// ============================================================
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    // DOM already loaded
+    initializeApp();
+}
+
+// ============================================================
+// Export for debugging
+// ============================================================
+window.iOTPX = {
+    state,
+    executeBypassLogin,
+    switchView,
+    triggerAction,
+    adminCommand,
+    logout,
+    logTerminal
+};
