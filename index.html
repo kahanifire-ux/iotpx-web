@@ -3,56 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOTPX - Premium Hub</title>
+    <title>iOTPX - Premium OTP Service Hub</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <div id="auth-screen" style="display: block; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px;">
-        <div class="auth-card" style="background: #161f32; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;">
-            <i class="fa-solid fa-bolt" style="font-size: 3rem; color: #3b82f6; margin-bottom: 15px;"></i>
-            <h2 style="color: #fff; margin-bottom: 20px;">iOTPX HUB</h2>
-            
-            <div style="margin-bottom: 15px; text-align: left;">
-                <label style="color: #94a3b8; font-size: 0.85rem; display: block; margin-bottom: 5px;">Gmail Address</label>
-                <input type="email" id="auth-email" placeholder="example@gmail.com" style="width: 100%; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; color: #fff;">
+    <div id="auth-screen" class="screen-container active">
+        <div class="auth-card">
+            <div class="brand-header">
+                <i class="fa-solid fa-bolt brand-icon"></i>
+                <h2>iOTPX HUB</h2>
+                <p>Login to access premium OTP servers</p>
             </div>
             
-            <div style="margin-bottom: 25px; text-align: left;">
-                <label style="color: #94a3b8; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
-                <input type="password" id="auth-password" placeholder="••••••••" style="width: 100%; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; color: #fff;">
+            <div id="login-form-bypass">
+                <div class="input-group">
+                    <label><i class="fa-solid fa-envelope"></i> Gmail Address</label>
+                    <input type="email" id="auth-email" placeholder="example@gmail.com" required>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" required>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-block" onclick="executeBypassLogin()">
+                    <span id="btn-text">Sign In / Register</span>
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                </button>
             </div>
-            
-            <button type="button" onclick="handleAuth()" style="width: 100%; padding: 14px; background: #3b82f6; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                Sign In / Register
-            </button>
+
+            <div class="auth-footer">
+                <p>New user? Enter your details to auto-register instantly.</p>
+            </div>
         </div>
     </div>
 
-    <div id="app-screen" style="display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px;">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div>
-                <h3 id="user-display-email" style="color: #fff; margin: 0;">user@gmail.com</h3>
-                <span style="color: #10b981; font-size: 0.8rem;">Balance: ₹<span id="user-balance">0.00</span></span>
+    <div id="app-screen" class="screen-container hidden-panel" style="display: none;">
+        
+        <header class="app-header">
+            <div class="user-meta">
+                <i class="fa-solid fa-circle-user profile-avatar"></i>
+                <div>
+                    <span id="user-display-email" class="user-email">user@gmail.com</span>
+                    <span class="user-rank">Regular Rank</span>
+                </div>
             </div>
-            <button id="admin-toggle-btn" style="padding: 8px 12px; background: rgba(236, 72, 153, 0.2); color: #ec4899; border: 1px solid #ec4899; border-radius: 8px; display: none;" onclick="switchView('admin')">Admin Panel</button>
+            <div class="header-actions">
+                <button id="admin-toggle-btn" class="btn btn-admin hidden" onclick="switchView('admin')">
+                    <i class="fa-solid fa-user-shield"></i> Admin Panel
+                </button>
+                <button class="btn btn-logout" onclick="logout()">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
         </header>
 
-        <div id="user-view" style="display: block;">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-                <div style="background: #161f32; padding: 20px; border-radius: 12px; text-align: center;" onclick="alert('OTP Action Triggered')">🛒 GET OTP</div>
-                <div style="background: #161f32; padding: 20px; border-radius: 12px; text-align: center;" onclick="alert('Deposit Triggered')">💰 DEPOSIT</div>
+        <div class="balance-card">
+            <div class="balance-info">
+                <p>Available Balance</p>
+                <h1>₹ <span id="user-balance">0.00</span></h1>
             </div>
+            <button class="btn btn-deposit-quick" onclick="switchView('user'); document.getElementById('deposit-section').scrollIntoView({behavior: 'smooth'});">
+                <i class="fa-solid fa-plus"></i> Add Money
+            </button>
         </div>
 
-        <div id="admin-view" style="display: none;">
-            <h4 style="color: #ec4899;">👑 Master Admin Control</h4>
-            <button style="padding: 8px; background: #334155; color: #fff; border: none; border-radius: 5px; margin-bottom: 15px;" onclick="switchView('user')">Back to User Mode</button>
-            <div style="background: #0e1422; padding: 15px; border-radius: 12px; color: #fff;">
-                <p>Admin Operations Ready...</p>
+        <main id="user-view" class="view-content active">
+            <section class="grid-layout">
+                <div class="grid-item" onclick="triggerAction('Get OTP')">
+                    <i class="fa-solid fa-cart-shopping grid-icon text-blue"></i>
+                    <span>🛒 GET OTP</span>
+                </div>
+                <div class="grid-item" id="deposit-section" onclick="triggerAction('Deposit')">
+                    <i class="fa-solid fa-money-bill-wave grid-icon text-green"></i>
+                    <span>💰 DEPOSIT</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Profile')">
+                    <i class="fa-solid fa-user grid-icon text-purple"></i>
+                    <span>👤 PROFILE</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('SMS Checker')">
+                    <i class="fa-solid fa-envelope-open-text grid-icon text-yellow"></i>
+                    <span>📩 SMS CHECKER</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Support')">
+                    <i class="fa-solid fa-headset grid-icon text-red"></i>
+                    <span>🎧 SUPPORT</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Refer & Earn')">
+                    <i class="fa-solid fa-gift grid-icon text-orange"></i>
+                    <span>🎁 REFER & EARN</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('History')">
+                    <i class="fa-solid fa-scroll grid-icon"></i>
+                    <span>📜 HISTORY</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Updates')">
+                    <i class="fa-solid fa-bullhorn grid-icon"></i>
+                    <span>📢 UPDATES</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Settings')">
+                    <i class="fa-solid fa-gear grid-icon"></i>
+                    <span>⚙️ SETTINGS</span>
+                </div>
+                <div class="grid-item" onclick="triggerAction('Cancel Order')">
+                    <i class="fa-solid fa-circle-xmark grid-icon text-muted"></i>
+                    <span>❌ CANCEL</span>
+                </div>
+            </section>
+
+            <div class="status-terminal">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">System Logs</span>
+                </div>
+                <div id="terminal-output" class="terminal-body">
+                    <p class="text-green">[System]: Welcome to iOTPX. Select an action from the matrix grid loop above...</p>
+                </div>
             </div>
-        </div>
+        </main>
+
+        <main id="admin-view" class="view-content" style="display: none;">
+            <div class="admin-header">
+                <h3><i class="fa-solid fa-unlock-keyhole"></i> Master Control Core</h3>
+                <button class="btn btn-secondary btn-sm" onclick="switchView('user')">
+                    <i class="fa-solid fa-arrow-left"></i> User Mode
+                </button>
+            </div>
+
+            <div class="admin-control-hub">
+                <div class="admin-sector-card">
+                    <h4><i class="fa-solid fa-users-gear"></i> User Management</h4>
+                    <div class="admin-actions-grid">
+                        <button class="btn-admin-action" onclick="adminCommand('User Lookup')">🔍 Lookup</button>
+                        <button class="btn-admin-action" onclick="adminCommand('Give Bal')">💰 Give Bal</button>
+                        <button class="btn-admin-action" onclick="adminCommand('Cut Bal')">✂️ Cut Bal</button>
+                        <button class="btn-admin-action" onclick="adminCommand('Ban User')">🚫 Ban User</button>
+                    </div>
+                </div>
+                <div class="admin-sector-card">
+                    <h4><i class="fa-solid fa-network-wired"></i> Service & API Settings</h4>
+                    <div class="admin-actions-grid">
+                        <button class="btn-admin-action" onclick="adminCommand('Add Service')">➕ Add Serv</button>
+                        <button class="btn-admin-action" onclick="adminCommand('Edit Price')">✏️ Price</button>
+                        <button class="btn-admin-action" onclick="adminCommand('API Key')">🔑 API Key</button>
+                        <button class="btn-admin-action" onclick="adminCommand('Stock Checker')">📦 Stock</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
     </div>
 
     <script src="app.js"></script>
