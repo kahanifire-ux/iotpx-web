@@ -17,7 +17,6 @@ function executeBypassLogin() {
     state.currentUser = emailValue;
     document.getElementById('user-display-email').innerText = emailValue;
 
-    // Admin login logic checker
     if (emailValue.toLowerCase().includes('admin') || passwordValue === state.adminId) {
         state.isAdmin = true;
         state.balance = 99999.00;
@@ -30,18 +29,35 @@ function executeBypassLogin() {
 
     document.getElementById('user-balance').innerText = state.balance.toFixed(2);
 
-    // Direct Style Manipulation - Isko css block nahi kar payega
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
+    // FIXED LOGIC: Handling both classes (for CSS structure) AND display styles simultaneously
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    const userView = document.getElementById('user-view');
+
+    if (authScreen && appScreen && userView) {
+        authScreen.classList.remove('active');
+        authScreen.style.setProperty('display', 'none', 'important');
+
+        appScreen.classList.add('active');
+        appScreen.style.setProperty('display', 'block', 'important');
+        userView.style.setProperty('display', 'block', 'important');
+        
+        logTerminal(`[System]: Session verified for ${emailValue}`, 'text-green');
+    } else {
+        alert("DOM Binding Error. Check component IDs.");
+    }
 }
 
 function switchView(viewName) {
+    const userView = document.getElementById('user-view');
+    const adminView = document.getElementById('admin-view');
+    
     if (viewName === 'admin') {
-        document.getElementById('user-view').style.display = 'none';
-        document.getElementById('admin-view').style.display = 'block';
+        userView.style.setProperty('display', 'none', 'important');
+        adminView.style.setProperty('display', 'block', 'important');
     } else {
-        document.getElementById('admin-view').style.display = 'none';
-        document.getElementById('user-view').style.display = 'block';
+        adminView.style.setProperty('display', 'none', 'important');
+        userView.style.setProperty('display', 'block', 'important');
     }
 }
 
@@ -53,7 +69,7 @@ function adminCommand(cmd) {
     logTerminal(`[Admin]: Executing command -> ${cmd}`, 'text-yellow');
 }
 
- tyranny line logTerminal(message, colorClass = '') {
+function logTerminal(message, colorClass = '') {
     const terminal = document.getElementById('terminal-output');
     if (!terminal) return;
     const time = new Date().toLocaleTimeString();
@@ -65,8 +81,13 @@ function adminCommand(cmd) {
 }
 
 function logout() {
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('auth-screen').style.display = 'block';
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    
+    appScreen.style.setProperty('display', 'none', 'important');
+    authScreen.style.setProperty('display', 'block', 'important');
+    authScreen.classList.add('active');
+    
     document.getElementById('auth-email').value = '';
     document.getElementById('auth-password').value = '';
 }
