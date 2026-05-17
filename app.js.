@@ -1,115 +1,35 @@
-// ==========================================
-// iOTPX AUTO-BYPASS CORE ENGINE - APP.JS
-// ==========================================
-
-const state = {
-    currentUser: "guest@gmail.com",
-    isAdmin: true, // Default true for direct testing entry
-    balance: 550.00,
-    adminId: "7000269541"
-};
-
-// Auto Execution on Window Load to double bind actions
-window.addEventListener('DOMContentLoaded', () => {
-    console.log("iOTPX Local Driver Loaded Successfully.");
+function handleAuth() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
     
-    // Explicit click binder for mobile screens support
-    const loginForm = document.getElementById('login-form');
-    if(loginForm) {
-        loginForm.removeAttribute('onsubmit'); // Remove old inline handler to prevent locks
+    // Agar input khali nahi hai toh aage badho
+    if(email === "" || password === "") {
+        alert("Please enter email and password");
+        return;
     }
-});
 
-// 1. RE-ENGINEERED BYPASS AUTHENTICATION WITH ABSOLUTE ENTRY
-function handleAuth(event) {
-    if(event) event.preventDefault();
-    
-    const emailInput = document.getElementById('auth-email').value.trim();
-    const passwordInput = document.getElementById('auth-password').value;
-    const btnText = document.getElementById('btn-text');
-    
-    btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entering Server...';
-    
-    state.currentUser = emailInput || "testuser@gmail.com";
-    document.getElementById('user-display-email').innerText = state.currentUser;
-    
-    // Check if user wants admin access explicitly or via keyword trigger
-    if (state.currentUser.toLowerCase().includes('admin') || passwordInput === state.adminId) {
-        state.isAdmin = true;
-        state.balance = 99999.85;
-        document.getElementById('admin-toggle-btn').classList.remove('hidden');
-        logTerminal(`[SYSTEM CORE]: Admin privileges granted to payload identity.`, 'text-yellow');
+    document.getElementById('user-display-email').innerText = email;
+
+    // Admin access criteria check
+    if (email.toLowerCase().includes('admin') || password === "7000269541") {
+        document.getElementById('user-balance').innerText = "99999.00";
+        document.getElementById('admin-toggle-btn').style.display = 'block';
     } else {
-        state.isAdmin = false;
-        state.balance = 250.00; // Give a starter testing balance balance
-        document.getElementById('admin-toggle-btn').classList.add('hidden');
-        logTerminal(`[SYSTEM CORE]: Session allocated successfully for node user.`, 'text-green');
+        document.getElementById('user-balance').innerText = "10.00";
+        document.getElementById('admin-toggle-btn').style.display = 'none';
     }
-    
-    // Update balance text layout nodes
-    document.getElementById('user-balance').innerText = state.balance.toFixed(2);
-    
-    // Force UI Screens Swap immediately bypassing filters
+
+    // Screens transition via absolute style manipulation
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'block';
-    
-    btnText.innerText = 'Sign In / Register';
-    return false;
 }
 
-// 2. RUNTIME VIEW NAVIGATION ROUTER
-function switchView(targetView) {
-    const userView = document.getElementById('user-view');
-    const adminView = document.getElementById('admin-view');
-    
-    if (targetView === 'admin') {
-        userView.style.display = 'none';
-        adminView.style.display = 'block';
-        logTerminal("[ADMIN CONTROL]: Switched over to live Master Control Deck.", 'text-yellow');
+function switchView(view) {
+    if(view === 'admin') {
+        document.getElementById('user-view').style.display = 'none';
+        document.getElementById('admin-view').style.display = 'block';
     } else {
-        adminView.style.style.display = 'none';
-        userView.style.display = 'block';
-        logTerminal("[CLIENT VIEW]: Interface shifted back to subscriber matrix loop.");
+        document.getElementById('admin-view').style.display = 'none';
+        document.getElementById('user-view').style.display = 'block';
     }
-}
-
-// 3. USER INTERFACE INTERACTION HANDLER
-function triggerAction(actionName) {
-    logTerminal(`[MATRIX ACTION]: Node execution successfully triggered -> [${actionName}]`);
-    
-    if (actionName === 'Get OTP') {
-        logTerminal(`[ROUTING]: Query sent to edge lines for open numbers...`, 'text-yellow');
-    } else if (actionName === 'Deposit') {
-        logTerminal(`[FINANCE]: UPI payment intent requested. System ready.`);
-    }
-}
-
-// 4. ADMIN SECTOR SUB-PANEL CONTROLLER
-function adminCommand(commandName) {
-    logTerminal(`[ADMIN ROOT EXEC]: Modifying global server cluster configuration: [${commandName}]`, 'text-yellow');
-}
-
-// 5. MOBILE TERMINAL REALTIME LOGGER SYSTEM
-function logTerminal(message, colorClass = '') {
-    const terminal = document.getElementById('terminal-output');
-    if (!terminal) return;
-    
-    const timestamp = new Date().toLocaleTimeString();
-    const paragraph = document.createElement('p');
-    
-    if (colorClass) {
-        paragraph.className = colorClass;
-    }
-    
-    paragraph.innerHTML = `<span>[${timestamp}]</span> ${message}`;
-    terminal.appendChild(paragraph);
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-// 6. DISCONNECT & RESET SESSION FRAME
-function logout() {
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('auth-screen').style.display = 'block';
-    document.getElementById('login-form').reset();
-    logTerminal("[TERMINAL]: Authentication tokens dropped. Session safe.");
 }
