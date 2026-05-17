@@ -7,66 +7,47 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Critical override to prevent any form-like behavior */
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            background: #0a0a1a;
-        }
-        .screen-container {
-            display: none !important;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .screen-container.active {
-            display: flex !important;
-            opacity: 1;
-        }
-        #auth-screen.active {
-            display: flex !important;
-        }
-        #app-screen.active {
-            display: block !important;
-        }
-        /* Force block for app views */
-        .view-content {
-            display: none !important;
-        }
-        .view-content.active-view {
-            display: block !important;
+        /* Force Reset Everything to eliminate style.css hierarchy issues completely */
+        #auth-screen, #app-screen, #user-view, #admin-view {
+            transition: all 0.3s ease-in-out;
         }
     </style>
 </head>
 <body class="dark-theme">
-    <div id="auth-screen" class="screen-container active">
+
+    <div id="auth-screen" style="display: block !important;">
         <div class="auth-card">
             <div class="brand-header">
                 <i class="fa-solid fa-bolt brand-icon"></i>
                 <h2>iOTPX HUB</h2>
                 <p>Login to access premium OTP servers</p>
             </div>
+            
             <div class="login-fields-box">
                 <div class="input-group">
                     <label><i class="fa-solid fa-envelope"></i> Gmail Address</label>
                     <input type="email" id="auth-email" placeholder="example@gmail.com" autocomplete="email">
                 </div>
+                
                 <div class="input-group">
                     <label><i class="fa-solid fa-lock"></i> Password</label>
                     <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
                 </div>
-                <button type="button" id="login-btn" class="btn btn-primary btn-block">
+                
+                <button type="button" id="login-submit-btn" class="btn btn-primary btn-block" style="cursor: pointer !important; z-index: 9999 !important;">
                     <span id="btn-text">Sign In / Register</span>
                     <i class="fa-solid fa-right-to-bracket"></i>
                 </button>
             </div>
+
             <div class="auth-footer">
                 <p>New user? Enter your details to auto-register instantly.</p>
             </div>
         </div>
     </div>
 
-    <div id="app-screen" class="screen-container">
+    <div id="app-screen" style="display: none !important;">
+        
         <header class="app-header">
             <div class="user-meta">
                 <i class="fa-solid fa-circle-user profile-avatar"></i>
@@ -76,24 +57,26 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="admin-toggle-btn" class="btn btn-admin" style="display: none;">
+                <button id="admin-toggle-btn" class="btn btn-admin" style="display: none !important;">
                     <i class="fa-solid fa-user-shield"></i> Admin Panel
                 </button>
-                <button class="btn btn-logout" id="logout-btn">
+                <button id="app-logout-btn" class="btn btn-logout">
                     <i class="fa-solid fa-power-off"></i>
                 </button>
             </div>
         </header>
+
         <div class="balance-card">
             <div class="balance-info">
                 <p>Available Balance</p>
                 <h1>₹ <span id="user-balance">0.00</span></h1>
             </div>
-            <button class="btn btn-deposit-quick" id="deposit-btn">
+            <button type="button" id="quick-deposit-btn" class="btn btn-deposit-quick">
                 <i class="fa-solid fa-plus"></i> Add Money
             </button>
         </div>
-        <main id="user-view" class="view-content active-view">
+
+        <main id="user-view" style="display: none !important;">
             <section class="grid-layout">
                 <div class="grid-item" data-action="Get OTP">
                     <i class="fa-solid fa-cart-shopping grid-icon text-blue"></i>
@@ -136,6 +119,7 @@
                     <span>❌ CANCEL</span>
                 </div>
             </section>
+
             <div class="status-terminal">
                 <div class="terminal-header">
                     <span class="dot red"></span>
@@ -148,35 +132,39 @@
                 </div>
             </div>
         </main>
-        <main id="admin-view" class="view-content">
+
+        <main id="admin-view" style="display: none !important;">
             <div class="admin-header">
                 <h3><i class="fa-solid fa-unlock-keyhole"></i> Master Control Core</h3>
-                <button class="btn btn-secondary btn-sm" id="user-mode-btn">
+                <button type="button" id="admin-back-btn" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-arrow-left"></i> User Mode
                 </button>
             </div>
+
             <div class="admin-control-hub">
                 <div class="admin-sector-card">
                     <h4><i class="fa-solid fa-users-gear"></i> User Management</h4>
                     <div class="admin-actions-grid">
-                        <button class="btn-admin-action" data-admin-action="User Lookup">🔍 Lookup</button>
-                        <button class="btn-admin-action" data-admin-action="Give Bal">💰 Give Bal</button>
-                        <button class="btn-admin-action" data-admin-action="Cut Bal">✂️ Cut Bal</button>
-                        <button class="btn-admin-action" data-admin-action="Ban User">🚫 Ban User</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="User Lookup">🔍 Lookup</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Give Bal">💰 Give Bal</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Cut Bal">✂️ Cut Bal</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Ban User">🚫 Ban User</button>
                     </div>
                 </div>
                 <div class="admin-sector-card">
                     <h4><i class="fa-solid fa-network-wired"></i> Service & API Settings</h4>
                     <div class="admin-actions-grid">
-                        <button class="btn-admin-action" data-admin-action="Add Service">➕ Add Serv</button>
-                        <button class="btn-admin-action" data-admin-action="Edit Price">✏️ Price</button>
-                        <button class="btn-admin-action" data-admin-action="API Key">🔑 API Key</button>
-                        <button class="btn-admin-action" data-admin-action="Stock Checker">📦 Stock</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Add Service">➕ Add Serv</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Edit Price">✏️ Price</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="API Key">🔑 API Key</button>
+                        <button type="button" class="btn-admin-action" data-admin-cmd="Stock Checker">📦 Stock</button>
                     </div>
                 </div>
             </div>
         </main>
+
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
